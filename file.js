@@ -67,19 +67,14 @@ class Knight {
 		console.table(arrayPreviousMoves);
 	}
 
-	move2(
+	validMoves(
 		coord = [0, 0],
 		targetCoord,
 		array = [coord],
 		allPathsArray = [coord],
 		i = 0
 	) {
-		if (!this.checkIfMoveIsInsideBoard(coord)) return;
 		if (this.compareTwoCoords(array[0], targetCoord)) {
-			if (this.compareTwoCoords(array[0], targetCoord)) {
-				console.table(allPathsArray);
-			}
-
 			return allPathsArray;
 		} else {
 			array = array.concat(
@@ -96,10 +91,39 @@ class Knight {
 			);
 
 			array.shift();
-			this.move2(array[0], targetCoord, array, allPathsArray, (i = +1));
-
-			return allPathsArray;
+			return this.validMoves(
+				array[0],
+				targetCoord,
+				array,
+				allPathsArray,
+				(i = +1)
+			);
 		}
+	}
+	validPath(coord, targetCoord) {
+		let validMovesArray = this.validMoves(coord, targetCoord);
+		let reverseValidMovesArray = this.validMoves(targetCoord, coord);
+		let validPathArray = [];
+		for (let i = 0; i < validMovesArray.length; i++) {
+			for (let j = 0; j < reverseValidMovesArray.length; j++) {
+				if (
+					this.compareTwoCoords(
+						validMovesArray[i],
+						reverseValidMovesArray[j]
+					)
+				) {
+					//console.table("add path");
+					validPathArray.push(validMovesArray[i]);
+				}
+			}
+		}
+		for (let i = 0; i < validPathArray.length; i++) {
+			if (this.compareTwoCoords(validPathArray[i], targetCoord)) {
+				validPathArray.splice(i + 1, validPathArray.length - 1);
+				console.log("IS HERE: " + i);
+			}
+		}
+		return validPathArray;
 	}
 }
 
@@ -112,4 +136,6 @@ console.log(knight.checkIfMoveIsInsideBoard([9, 9]));
 console.log(knight.checkIfMoveIsInsideBoard([-1, 5]));
 console.table(knight.allPossibleMoves([7, 7]));
 //knight.move([3, 3]);
-console.table(knight.move2([3, 3], [0, 0]));
+console.table("valid path");
+console.table(knight.validPath([2, 3], [3, 3]));
+console.table(knight.validPath([3, 3], [2, 3]));

@@ -49,93 +49,59 @@ class Knight {
 		}
 		return possibleMoves;
 	}
-	move(coord = [0, 0]) {
-		if (!this.checkIfMoveIsInsideBoard(coord)) return;
 
-		let actualPosition = coord;
-		let nextMove = [];
-		let arrayPreviousMoves = [];
-		arrayPreviousMoves.push(coord);
-		for (let index = 0; index < 20; index++) {
-			nextMove = this.checkIfCoordHaveBeenUse(
-				arrayPreviousMoves,
-				this.allPossibleMoves(actualPosition)
-			)[0];
-			arrayPreviousMoves.push(nextMove);
-			actualPosition = nextMove;
-		}
-		console.table(arrayPreviousMoves);
-	}
-
-	validMoves(
+	moveToTarget(
 		coord = [0, 0],
 		targetCoord,
 		array = [coord],
 		allPathsArray = [coord],
-		i = 0
+		path = [coord],
+		rightPath = 0
 	) {
 		if (this.compareTwoCoords(array[0], targetCoord)) {
-			return allPathsArray;
-		} else {
-			array = array.concat(
-				this.checkIfCoordHaveBeenUse(
-					allPathsArray,
-					this.allPossibleMoves(array[0])
-				)
+			let message = "";
+			console.log(
+				"You make it in " +
+					rightPath.length / 2 +
+					" moves, here is your path:"
 			);
+			for (let index = 0; index < rightPath.length; index++) {
+				if (index % 2) {
+					message += rightPath[index] + "],";
+				} else {
+					message += "[" + rightPath[index] + ",";
+				}
+			}
+			console.log(message);
+		} else {
+			array = array.concat(this.allPossibleMoves(array[0]));
 			allPathsArray = allPathsArray.concat(
 				this.checkIfCoordHaveBeenUse(
 					allPathsArray,
 					this.allPossibleMoves(array[0])
 				)
 			);
-
+			let nextMoves = this.allPossibleMoves(array[0]);
+			nextMoves.forEach((move) => {
+				if (this.compareTwoCoords(move, targetCoord)) {
+					rightPath = path[0].concat(move);
+				}
+				path.push(path[0].concat(move));
+			});
+			path.shift();
 			array.shift();
-			return this.validMoves(
+			return this.moveToTarget(
 				array[0],
 				targetCoord,
 				array,
 				allPathsArray,
-				(i = +1)
+				path,
+				rightPath
 			);
 		}
-	}
-	validPath(coord, targetCoord) {
-		let validMovesArray = this.validMoves(coord, targetCoord);
-		let reverseValidMovesArray = this.validMoves(targetCoord, coord);
-		let validPathArray = [];
-		for (let i = 0; i < validMovesArray.length; i++) {
-			for (let j = 0; j < reverseValidMovesArray.length; j++) {
-				if (
-					this.compareTwoCoords(
-						validMovesArray[i],
-						reverseValidMovesArray[j]
-					)
-				) {
-					//console.table("add path");
-					validPathArray.push(validMovesArray[i]);
-				}
-			}
-		}
-		for (let i = 0; i < validPathArray.length; i++) {
-			if (this.compareTwoCoords(validPathArray[i], targetCoord)) {
-				validPathArray.splice(i + 1, validPathArray.length - 1);
-				console.log("IS HERE: " + i);
-			}
-		}
-		return validPathArray;
 	}
 }
 
 const knight = new Knight();
-console.log(knight.checkIfMoveIsInsideBoard([3, 3]));
-console.log(knight.checkIfMoveIsInsideBoard([7, 0]));
-console.log(knight.checkIfMoveIsInsideBoard([7, 1]));
-console.log(knight.checkIfMoveIsInsideBoard([8, 0]));
-console.log(knight.checkIfMoveIsInsideBoard([9, 9]));
-console.log(knight.checkIfMoveIsInsideBoard([-1, 5]));
-console.table(knight.allPossibleMoves([7, 7]));
-//knight.move([3, 3]);
-console.table("valid path");
-console.table(knight.validPath([2, 3], [3, 3]));
-console.table(knight.validPath([3, 3], [2, 3]));
+knight.moveToTarget([3, 2], [3, 3]);
+knight.moveToTarget([0, 0], [7, 7]);
